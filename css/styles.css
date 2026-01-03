@@ -1,0 +1,295 @@
+ :root {
+            --viva-yellow: #f1c40f;
+            --gold-gradient: linear-gradient(145deg, #f9e29c 0%, #d4af37 20%, #f9e29c 45%, #b38f00 70%, #f9e29c 100%);
+            --app-height: 100svh; 
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a4a1a 0%, #050d05 100%);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: var(--app-height);
+            padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* --- INFO DO CLIENTE --- */
+        #user-info {
+            width: 90%;
+            margin-top: 20px;
+            text-align: right;
+            z-index: 900;
+        }
+
+        #labelNome {
+            font-size: 14px;
+            color: var(--viva-yellow);
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer; /* Indica que é clicável */
+            padding: 5px;
+            text-decoration: underline dotted rgba(241, 196, 15, 0.5);
+        }
+
+        #balance-tag {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 15px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        /* --- ROLETA DESIGN LUXO --- */
+        .outer-frame {
+            position: relative;
+            width: min(85vw, 48vh); 
+            height: min(85vw, 48vh);
+            background: linear-gradient(145deg, #2c2c2e, #1a1a1c);
+            border-radius: 50%;
+            padding: 12px;
+            border: 6px solid #2a2a2c;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.7), 0 0 0 4px #d4af37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .outer-frame::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            border: 3px dotted rgba(212, 175, 55, 0.4);
+            animation: rotate-lights 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes rotate-lights { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 48px;
+            height: 65px;
+            background: var(--gold-gradient);
+            z-index: 100;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 50% 100%, 0% 20%);
+            border: 1px solid rgba(255,255,255,0.4);
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6));
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 6s cubic-bezier(0.15, 0, 0.15, 1);
+            z-index: 2;
+        }
+
+        .center-logo {
+            position: absolute;
+            width: 15%;
+            height: 15%;
+            z-index: 15;
+            background: var(--gold-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #1c1c1e;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.8);
+            font-size: 10px;
+            color: #111;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        /* --- INPUTS E BOTÕES --- */
+        .spin-btn {
+            margin-bottom: 40px;
+            width: 85%;
+            max-width: 340px;
+            padding: 20px;
+            background: var(--gold-gradient);
+            border: none;
+            border-radius: 18px;
+            font-size: 1.2rem;
+            color: #0a0a0b;
+            font-weight: 900;
+            text-transform: uppercase;
+            box-shadow: 0 8px 0 #967d28;
+            transition: all 0.1s;
+            cursor: pointer;
+        }
+
+        .spin-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #967d28; }
+        .spin-btn:disabled { filter: grayscale(1); opacity: 0.5; }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid #333;
+            background: #111;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        /* --- MODAIS --- */
+        
+        .app-modal-card {
+            background: rgba(30, 30, 32, 0.95);
+            width: 90%;
+            max-width: 340px;
+            border-radius: 28px;
+            padding: 24px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .status-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f1c40f;
+            margin: 0 auto 10px;
+        }
+
+        .btn-native-primary {
+            width: 100%;
+            height: 54px;
+            background: #ffffff;
+            border: none;
+            border-radius: 16px;
+            color: #000000;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        #btnFecharEdicao {
+            display:none;
+            background:none;
+            color:#ffffff;
+            border:1px solid yellow;
+            border-radius: 10px;
+            margin-top:15px;
+            padding: 10px;
+            font-weight: bold;
+            cursor:pointer;
+        }
+        
+        #btnFecharEdicao:hover {
+            background: var(--gold-gradient);
+            font-weight: bold;
+            color: #000000;
+        }
+               
+        /* --- MODAL de premio --- */
+        
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;    
+    background: #000000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+    
+}
+
+        /* Caixa do Modal */
+
+.modal-content {
+    background: rgba(241, 196, 15, 0.15);
+    width: 100%;
+    max-width: 320px;
+    padding: 40px 25px;
+    border-radius: 32px;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+        /* Animação de entrada tipo App */
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+        /* Texto "Parabéns" */
+
+.voce-ganhou {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+        /* Cartão do Prêmio */
+
+.prize-badge {
+    background: var(--gold-gradient);
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 900;
+    padding: 20px 15px;
+    border-radius: 20px;
+    margin: 20px 0;
+    box-shadow: 0 10px 20px rgba(241, 196, 15, 0.3);
+    text-transform: uppercase;
+    word-wrap: break-word;
+}
+
+        /* Botão Fechar */
+
+#btnClosePrize {
+    background: #2c2c2e;
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+#btnClosePrize:active {
+    transform: scale(0.96);
+    background: #3a3a3c;
+}

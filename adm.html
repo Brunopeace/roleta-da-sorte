@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="img/icon-512.png">
+    <link rel="stylesheet" type="text/css" href="css/adm.css">
+    <title>ADM - Giro da sorte</title>
+    
+</head>
+<body>
+    <div class="card">
+        
+        <h2>ADM GIRO DA SORTE</h2>
+
+        <label>Clientes:</label>
+<div id="userList" class="list-container"></div>
+                        
+        <h3>🏆 Prêmios Ganhos</h3>
+   <div id="prizesList" class="list-container"></div>
+        <button onclick="limparPremios()" class="secondary">Limpar Histórico</button>
+
+        <div id="editSection">
+            <label>Cliente Selecionado:</label>
+            <input type="text" id="inputName" readonly style="opacity: 0.5;" placeholder="Selecione na lista">
+
+            <label>Adicionar Giros:</label>
+    <input type="number" id="inputGiros" value="10">
+
+            <div class="btn-group">
+<button id="btnEnviar" onclick="enviarCreditos()" disabled>Liberar Giros</button>
+            </div>
+        </div>
+
+        <div class="status" id="statusMsg"></div>
+        
+        <button onclick="limparTudo()" class="secondary btn-reset-all">RESETAR BANCO DE DADOS</button>
+    </div>
+
+    <script src="js/adm.js" type="module"></script>
+</body>
+</html>

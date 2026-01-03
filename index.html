@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon" href="img/icon-512.png">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <title>Roleta Giro da sorte</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+</head>
+<body>
+
+    <div id="registration-overlay" class="modal-overlay" style="display: flex;">
+    <div class="modal-content">
+        <h2 id="modal-title" style="color: var(--viva-yellow); margin-top:0;">ENTRAR</h2>
+        <p id="modal-desc" style="opacity: 0.7; font-size: 14px;">Acesse sua conta para girar</p>
+        
+        <input type="text" id="reg-nome" placeholder="Seu Primeiro Nome" style="display: none;">
+        
+        <input type="tel" id="reg-tel" placeholder="Seu Telefone (WhatsApp)">
+
+        <div style="text-align: left; margin: 10px 5px; font-size: 13px; color: #888;">
+            <input type="checkbox" id="remember-me" checked style="width: auto; margin-right: 8px;"> 
+            <label for="remember-me" style="display: inline;">Lembrar-me</label>
+        </div>
+
+        <button id="btnAcao" class="spin-btn" style="width:100%; margin-top:10px; padding:15px; font-size:1rem; box-shadow: 0 5px 0 #967d28;">ENTRAR</button>
+        
+        <p id="toggle-text" style="font-size: 13px; margin-top: 20px; color: #aaa;">
+            Não tem cadastro? <span onclick="toggleAuthMode('cadastro')" style="color: var(--viva-yellow); cursor: pointer; font-weight: bold;">Cadastre-se</span>
+        </p>
+
+    <button id="btnFecharEdicao">Cancelar</button>
+    </div>
+</div>
+
+    <div id="user-info">
+        <span id="labelNome" onclick="abrirEdicao()">Aguardando...</span><br>
+        <div id="balance-tag">GIROS: <span id="labelGiros">0</span></div>
+    </div>
+
+    <div class="outer-frame">
+        <div class="pointer"></div>
+        <div class="center-logo">🍀</div>
+        <canvas id="wheel" width="600" height="600"></canvas>
+    </div>
+
+    <button class="spin-btn" id="spinBtn">GIRAR ROLETA</button>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+<h2 class="voce-ganhou">PARABÉNS! VOCÊ GANHOU:</h2>
+            <div class="prize-badge" id="prizeDisplay">---</div>
+            <br>
+       <button id="btnClosePrize">FECHAR</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalEsgotado">
+    <div class="app-modal-card">
+        <div class="modal-handle"></div> <div class="app-modal-header">
+            <div class="status-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2>Seus giros acabaram!</h2>
+        </div>
+
+        <div class="app-modal-body">
+    <p>Mas o próximo prêmio pode estar a apenas um clique de distância. Garanta novos créditos!</p>
+</div>
+
+        <div class="app-modal-footer">
+            <button onclick="document.getElementById('modalEsgotado').style.display='none'" class="btn-native-primary">
+                FECHAR
+            </button>
+        </div>
+    </div>
+</div>
+
+    <script src="js/script.js" type="module"></script>
+</script>
+
+</body>
+</html>
