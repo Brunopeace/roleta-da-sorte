@@ -1,7 +1,8 @@
 {
   "name": "Giro da Sorte",
   "short_name": "Giro da Sorte",
-  "start_url": "/",
+  "start_url": "/roleta-da-sorte/index.html",
+  "scope": "/roleta-da-sorte/",
   "display": "standalone",
   "background_color": "#0a0a0b",
   "icons": [
