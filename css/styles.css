@@ -293,3 +293,31 @@
     transform: scale(0.96);
     background: #3a3a3c;
 }
+
+
+/* Estilo do botão de instalação PWA */
+.install-pwa-button {
+    background: linear-gradient(145deg, #f9e29c, #d4af37);
+    color: #000000;
+    border: 1px solid #ffffff;
+    padding: 12px 25px;
+    border-radius: 15px;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+    transition: all 0.2s ease-in-out;
+    
+    margin-bottom: 25px;
+}
+
+.install-pwa-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(241, 196, 15, 0.6);
+}
+
+.install-pwa-button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(241, 196, 15, 0.4);
+}
