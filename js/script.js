@@ -15,6 +15,49 @@ if ('serviceWorker' in navigator) {
 
 
 
+
+
+    let deferredPrompt; 
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Exibe o botão de instalaçao
+        const installButton = document.getElementById('installButton');
+        if (installButton) {
+            installButton.style.display = 'block';
+        }
+    });
+
+    // Ouve o clique no seu botão de instalação
+    const installButton = document.getElementById('installButton');
+    if (installButton) {
+        installButton.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt(); // Mostra o prompt de instalação nativo do navegador
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuário aceitou instalar o PWA');
+                    } else {
+                        console.log('Usuário recusou instalar o PWA');
+                    }
+                    deferredPrompt = null; // Limpa o evento
+                    installButton.style.display = 'none'; // Esconde o botão após a tentativa
+                });
+            }
+        });
+    }
+
+    // Ouve quando o app é realmente instalado
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA instalado com sucesso!');
+        const installButton = document.getElementById('installButton');
+        if (installButton) {
+            installButton.style.display = 'none';
+        }
+    });
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     // Adicionado "get" nos imports para permitir a busca e atualização em massa
     import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
