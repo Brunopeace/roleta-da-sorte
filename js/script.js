@@ -77,13 +77,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
     let lastPlayedAngle = -1;
 
     const prizes = [
-        { label: "1 MÊS", color: "#2ecc71", weight: 5 },
+        { label: "1 MÊS", color: "#2ecc71", weight: 7 },
         { label: "NÃO FOI DESSA VEZ", color: "#222", weight: 95 },
         { label: "1 ANO", color: "#f1c40f", weight: 1 },
-        { label: "2 MESES", color: "#3498db", weight: 3 },
+        { label: "2 MESES", color: "#3498db", weight: 4 },
         { label: "6 MESES", color: "#e74c3c", weight: 1 },
         { label: "MAIS UMA CHANCE", color: "#9b59b6", weight: 40 },
-        { label: "1 MÊS", color: "#1abc9c", weight: 5 },
+        { label: "1 MÊS", color: "#1abc9c", weight: 7 },
         { label: "NÃO FOI DESSA VEZ", color: "#222", weight: 95 }
     ];
 
