@@ -101,13 +101,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
             const p = premios[id];
             const div = document.createElement('div');
             div.className = 'user-item';
-            div.style.borderLeft = "3px solid #2ecc71";
+        div.style.borderLeft = "3px solid #2ecc71";
             div.style.padding = "8px 12px";
             
             div.innerHTML = `
                 <div class="user-info-text">
-                    <b style="color:#fff">${p.nome}</b>
-                    <span style="color: #2ecc71">🎁 ${p.premio}</span>
+                  <b style="color:#fff">${p.nome}</b>
+  <span style="color: #2ecc71">🎁 ${p.premio}</span>
                     <small style="font-size:9px; color: yellow; display:block;">${p.hora}</small>
                 </div>
             `;
@@ -115,23 +115,52 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
         });
     });
 
-    // --- ENVIAR CRÉDITOS ---
-    window.enviarCreditos = function() {
-        if(!clienteSelecionado) return;
-        const input = document.getElementById('inputGiros');
-        const novosGiros = parseInt(input.value);
+    // --- ENVIAR OU REMOVER CRÉDITOS (CORRIGIDO) ---
+window.enviarCreditos = function() {
+    if(!clienteSelecionado) return;
+    const input = document.getElementById('inputGiros');
+    
+    // Convertemos o valor do input para número inteiro
+    const valorAlteracao = parseInt(input.value);
+    
+    if(isNaN(valorAlteracao) || valorAlteracao === 0) {
+        return alert("Digite um valor válido (ex: 10 ou -10)");
+    }
+
+    // BUSCAMOS O VALOR ATUAL GARANTINDO QUE SEJA NÚMERO
+    // Usamos Number() para evitar que o Firebase retorne como texto e cause o erro de '905'
+    const girosAtuais = Number(clienteSelecionado.giros) || 0;
+
+    // Fazemos a conta matemática pura
+    let girosFinais = girosAtuais + valorAlteracao;
+
+    // Segurança para não deixar créditos negativos
+    if (girosFinais < 0) girosFinais = 0;
+
+    const userRef = ref(db, 'clientes/' + clienteSelecionado.telefone);
+    
+    update(userRef, {
+        giros: girosFinais
+    }).then(() => {
+        // Atualiza o objeto local para que a próxima alteração use o valor novo
+        clienteSelecionado.giros = girosFinais;
+
+        const msg = document.getElementById('statusMsg');
+        if (valorAlteracao > 0) {
+            msg.innerText = `✅ Adicionado ${valorAlteracao} giros`;
+            msg.style.color = "#2ecc71";
+        } else {
+            msg.innerText = `❌ Removido ${Math.abs(valorAlteracao)} giros`;
+            msg.style.color = "#e74c3c";
+        }
         
-        if(isNaN(novosGiros) || novosGiros < 1) return alert("Digite um número de giros válido");
-        
-        const userRef = ref(db, 'clientes/' + clienteSelecionado.telefone);
-        update(userRef, {
-            giros: clienteSelecionado.giros + novosGiros
-        }).then(() => {
-            document.getElementById('statusMsg').innerText = `✅ +${novosGiros} giros para ${clienteSelecionado.nome}`;
-            input.value = ""; 
-            setTimeout(() => document.getElementById('statusMsg').innerText = "", 3000);
-        });
-    };
+        input.value = ""; 
+        setTimeout(() => msg.innerText = "", 3000);
+    }).catch(err => {
+        console.error(err);
+        alert("Erro ao atualizar.");
+    });
+};
 
     // --- LIMPAR DADOS EM MASSA ---
     window.limparPremios = function() {
