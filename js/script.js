@@ -138,75 +138,103 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
     const tel = rawTel.replace(/\D/g,'');
     const checkbox = document.getElementById('remember-me').checked;
 
-    // --- VALIDAÇÃO DE TELEFONE ---
+    // --- 1. VALIDAÇÕES BÁSICAS DE ENTRADA ---
     if (tel.length !== 11) {
         return alert("O telefone deve ter exatamente 11 dígitos (DDD + Número).");
     }
-    // Impede números óbvios de teste ou falsos (ex: 00000000000, 11111111111...)
     if (/^(\d)\1+$/.test(tel)) {
         return alert("Por favor, insira um número de telefone válido.");
     }
-    // Verifica se o DDD (dois primeiros dígitos) parece real (não começa com 0)
     if (parseInt(tel.substring(0, 2)) < 11) {
         return alert("DDD inválido.");
     }
-
-    if((authMode === 'cadastro' || authMode === 'edicao') && !nome) {
-        return alert("Digite seu nome!");
+    // Nome obrigatório em Cadastro ou Edição
+    if ((authMode === 'cadastro' || authMode === 'edicao') && nome.length < 2) {
+        return alert("Por favor, digite um nome válido.");
     }
 
     tickSound.play().then(() => { tickSound.pause(); tickSound.currentTime = 0; }).catch(() => {});
 
-    const telAntigo = clienteAtivo.telefone;
-    
-    // Se estiver editando e mudar o número, remove o antigo
-    if(authMode === 'edicao' && telAntigo && telAntigo !== tel) {
-        if(!confirm("Mudar o telefone removerá seus dados vinculados ao número antigo. Confirma?")) return;
-        remove(ref(db, 'clientes/' + telAntigo));
-    }
-
-    // Acessa o Firebase para verificar se o cliente existe
-    onValue(ref(db, 'clientes/' + tel), (snapshot) => {
-        let user;
-        if(snapshot.exists()) {
-            user = snapshot.val();
-            // Se for modo login e o usuário existe, apenas prossegue.
-            // Se for edição, atualiza o nome.
-            if(authMode === 'edicao' || authMode === 'cadastro') {
-                update(ref(db, 'clientes/' + tel), { nome: nome });
-                
-                // Atualiza o nome em todos os prêmios vinculados a este telefone
-                get(ref(db, 'premios')).then((prizeSnap) => {
-                    if (prizeSnap.exists()) {
-                        const premios = prizeSnap.val();
-                        Object.keys(premios).forEach(id => {
-                            if (premios[id].telefone === tel) {
-                                update(ref(db, 'premios/' + id), { nome: nome });
-                            }
-                        });
-                    }
-                });
-                user.nome = nome;
-            }
-        } else {
-            // Se não existe e tentou login
-            if(authMode === 'login') return alert("Telefone não encontrado. Por favor, faça o cadastro!");
+ // --- 2. VERIFICAÇÃO DE NOME DUPLICADO NO BANCO ---
+    get(ref(db, 'clientes')).then((snapshot) => {
+        if (authMode === 'cadastro' && snapshot.exists()) {
+            const clientes = snapshot.val();
+            // Verifica se algum cliente já usa esse nome (ignorando maiúsculas/minúsculas)
+            const nomeExiste = Object.values(clientes).some(c => c.nome && c.nome.toLowerCase() === nome.toLowerCase());
             
-            // Se for cadastro novo
-            user = { 
-                nome: nome, 
-                telefone: tel, 
-                giros: clienteAtivo.giros || 0 
-            };
-            set(ref(db, 'clientes/' + tel), user);
+            if (nomeExiste) {
+                return alert("Este nome já está em uso por outro usuário. Por favor, escolha um diferente.");
+            }
         }
 
-        if(checkbox) localStorage.setItem('viva_sorte_user', JSON.stringify(user));
-        else localStorage.removeItem('viva_sorte_user');
+ // --- 3. LÓGICA DE LOGIN / CADASTRO / EDIÇÃO ---
+        const telAntigo = clienteAtivo.telefone;
+        
+        // Se estiver editando e mudou o número, remove o registro antigo
+        if(authMode === 'edicao' && telAntigo && telAntigo !== tel) {
+            if(!confirm("Mudar o telefone removerá seus dados antigos. Confirma?")) return;
+            remove(ref(db, 'clientes/' + telAntigo));
+        }
 
-        document.getElementById('registration-overlay').style.display = 'none';
-        iniciarApp(tel);
-    }, { onlyOnce: true });
+        // Busca o usuário específico pelo telefone
+        get(ref(db, 'clientes/' + tel)).then((snap) => {
+            let user;
+
+            if (snap.exists()) {
+                user = snap.val();
+
+                // BLINDAGEM: Se o usuário existe mas está sem nome no banco (erro de cadastro anterior)
+                if (!user.nome || user.nome.trim() === "") {
+                    if (authMode === 'login' && !nome) {
+                        toggleAuthMode('cadastro');
+                        return alert("Seu cadastro está incompleto. Por favor, informe seu nome na tela de cadastro.");
+                    }
+                    // Se ele informou o nome agora, corrigimos o cadastro incompleto
+                    update(ref(db, 'clientes/' + tel), { nome: nome });
+                    user.nome = nome;
+                }
+
+                // Modo Edição: Atualiza nome do cliente e nos prêmios
+                if (authMode === 'edicao') {
+                    update(ref(db, 'clientes/' + tel), { nome: nome });
+                    get(ref(db, 'premios')).then((prizeSnap) => {
+                        if (prizeSnap.exists()) {
+                            const premios = prizeSnap.val();
+                            Object.keys(premios).forEach(id => {
+                                if (premios[id].telefone === tel) {
+                                    update(ref(db, 'premios/' + id), { nome: nome });
+                                }
+                            });
+                        }
+                    });
+                    user.nome = nome;
+                }
+            } else {
+                // Usuário não existe
+                if (authMode === 'login') {
+                    return alert("Telefone não encontrado. Por favor, faça o cadastro!");
+                }
+                
+     // Cadastro Novo: Criamos o objeto completo
+                user = { 
+                    nome: nome, 
+                    telefone: tel, 
+                    giros: 0 // Novo cadastro sempre começa com 0 para o ADM liberar depois
+                };
+                set(ref(db, 'clientes/' + tel), user);
+            }
+
+            // --- 4. FINALIZAÇÃO E LOGIN ---
+            if (checkbox) {
+                localStorage.setItem('viva_sorte_user', JSON.stringify(user));
+            } else {
+                localStorage.removeItem('viva_sorte_user');
+            }
+
+            document.getElementById('registration-overlay').style.display = 'none';
+            iniciarApp(tel);
+        });
+    });
 };
 
     function iniciarApp(tel) {
