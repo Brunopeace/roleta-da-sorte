@@ -75,6 +75,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
     let currentRotation = 0;
     let authMode = "login"; 
     let lastPlayedAngle = -1;
+    let winnerIndexGlobal = -1; // Para saber qual fatia deve piscar no final
+    
 
     const prizes = [
         { label: "1 MÊS", color: "#2ecc71", weight: 1 },
@@ -267,92 +269,165 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
     }
 
     // --- DESENHO E ANIMAÇÃO ---
-    function draw() {
-        const radius = 295;
-        prizes.forEach((p, i) => {
-            const angle = i * arc;
-            ctx.beginPath();
+    function draw(activeSlice = -1, isWinner = false) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas
+    const radius = 295;
+    const centerX = 300;
+    const centerY = 300;
+
+    prizes.forEach((p, i) => {
+        const angle = i * arc;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, angle, angle + arc);
+        
+        // --- EFEITO DE ILUMINAÇÃO ---
+        if (i === activeSlice) {
+            // Se for a fatia ativa (passando pela seta) ou o vencedor piscando
+            if (!isWinner || (isWinner && Math.floor(Date.now() / 200) % 2 === 0)) {
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 40;
+                ctx.shadowColor = "white"; // Brilho branco ao redor
+            } else {
+                ctx.fillStyle = "#555"; // Cor de "apagado" durante o pisca
+            }
+        } else {
             ctx.fillStyle = p.color;
-            ctx.moveTo(300, 300);
-            ctx.arc(300, 300, radius, angle, angle + arc);
-            ctx.fill();
-            ctx.save();
-            ctx.translate(300, 300);
-            ctx.rotate(angle + arc / 2);
-            ctx.fillStyle = "white";
-            ctx.font = "bold 20px Arial";
-            ctx.textAlign = "right";
-            ctx.fillText(p.label, radius - 25, 10);
-            ctx.restore();
-        });
-    }
+            ctx.shadowBlur = 0;
+        }
+
+        ctx.fill();
+        
+        // Desenho do Texto
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle + arc / 2);
+        ctx.fillStyle = "white";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "right";
+        ctx.fillText(p.label, radius - 25, 10);
+        ctx.restore();
+    });
+}
+
 
     function checkTick() {
-        if (!isSpinning) return;
-        const style = window.getComputedStyle(canvas);
-        const matrix = new WebKitCSSMatrix(style.transform);
-        const angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
-        const normalizedAngle = (angle < 0 ? angle + 360 : angle);
-        const sliceIndex = Math.floor(normalizedAngle / degPerSlice);
-        if (sliceIndex !== lastPlayedAngle) {
+    if (!isSpinning && winnerIndexGlobal === -1) return;
+
+    const style = window.getComputedStyle(canvas);
+    const matrix = new WebKitCSSMatrix(style.transform);
+    const angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+    const normalizedAngle = (angle < 0 ? angle + 360 : angle);
+    
+    // Calcula a fatia que está no topo (seta geralmente em 270 graus ou 0)
+    // Ajuste o "-90" dependendo de onde está sua seta visualmente
+    let activeSlice = Math.floor(((360 - normalizedAngle + 270) % 360) / degPerSlice);
+    
+    if (isSpinning) {
+        if (activeSlice !== lastPlayedAngle) {
             tickSound.pause();
             tickSound.currentTime = 0;
             tickSound.play().catch(() => {});
-            lastPlayedAngle = sliceIndex;
+            lastPlayedAngle = activeSlice;
         }
-        requestAnimationFrame(checkTick);
+        draw(activeSlice, false); // Desenha iluminando a fatia que passa
+    } else if (winnerIndexGlobal !== -1) {
+        draw(winnerIndexGlobal, true); // Desenha piscando o vencedor
     }
+
+    requestAnimationFrame(checkTick);
+}
+
 
     function spin() {
-        if (clienteAtivo.giros <= 0 || isSpinning) return;
-        isSpinning = true;
-        btnSpin.disabled = true;
-        btnSpin.innerText = "SORTEANDO...";
+    if (clienteAtivo.giros <= 0 || isSpinning) return;
+    
+    isSpinning = true;
+    btnSpin.disabled = true;
+    btnSpin.innerText = "SORTEANDO...";
+    winnerIndexGlobal = -1; // Reseta o vencedor anterior antes de girar
 
-        update(ref(db, 'clientes/' + clienteAtivo.telefone), {
-            giros: clienteAtivo.giros - 1
-        });
+    // 1. Subtrai o giro no Firebase
+    update(ref(db, 'clientes/' + clienteAtivo.telefone), {
+        giros: clienteAtivo.giros - 1
+    });
 
-        const totalWeight = prizes.reduce((acc, p) => acc + p.weight, 0);
-        let random = Math.random() * totalWeight;
-        let winnerIndex = 0;
-        for (let i = 0; i < prizes.length; i++) {
-            if (random < prizes[i].weight) { winnerIndex = i; break; }
-            random -= prizes[i].weight;
+    // 2. Lógica de sorteio por peso
+    const totalWeight = prizes.reduce((acc, p) => acc + p.weight, 0);
+    let random = Math.random() * totalWeight;
+    let winnerIndex = 0;
+    for (let i = 0; i < prizes.length; i++) {
+        if (random < prizes[i].weight) { 
+            winnerIndex = i; 
+            break; 
         }
-
-        const targetSliceAngle = (winnerIndex * degPerSlice) + (degPerSlice / 2);
-        const finalAngle = 360 - targetSliceAngle - 90; 
-        currentRotation += (3600 + finalAngle - (currentRotation % 360));
-        canvas.style.transform = `rotate(${currentRotation}deg)`;
-        requestAnimationFrame(checkTick);
-
-        setTimeout(() => {
-            isSpinning = false;
-            lastPlayedAngle = -1;
-            const result = prizes[winnerIndex].label;
-
-            if (result === "MAIS UMA CHANCE") {
-                update(ref(db, 'clientes/' + clienteAtivo.telefone), { giros: clienteAtivo.giros + 1 });
-                alert("🍀 MAIS UMA CHANCE!");
-            } else if (result === "NÃO FOI DESSA VEZ") {
-                if(clienteAtivo.giros <= 0) document.getElementById('modalEsgotado').style.display = 'flex';
-            } else {
-                document.getElementById('prizeDisplay').innerText = result;
-                document.getElementById('modal').style.display = 'flex';
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                
-                // GRAVAÇÃO DO PRÊMIO COM TELEFONE (PARA O ADM E PARA ATUALIZAÇÃO DE NOME)
-                set(ref(db, 'premios/' + Date.now()), {
-                    nome: clienteAtivo.nome,
-                    telefone: clienteAtivo.telefone, 
-                    premio: result,
-                    hora: new Date().toLocaleTimeString()
-                });
-            }
-            atualizarUI();
-        }, 6000);
+        random -= prizes[i].weight;
     }
+
+    // 3. Cálculo da rotação (ajustado para a seta no topo)
+    const targetSliceAngle = (winnerIndex * degPerSlice) + (degPerSlice / 2);
+    const finalAngle = 360 - targetSliceAngle - 90; 
+    currentRotation += (3600 + finalAngle - (currentRotation % 360));
+    
+    canvas.style.transform = `rotate(${currentRotation}deg)`;
+    
+    // Inicia o monitoramento da seta para tocar o som e acender as fatias
+    requestAnimationFrame(checkTick);
+
+    // 4. Quando a roleta para (após 6 segundos de animação CSS)
+    setTimeout(() => {
+        isSpinning = false;
+        lastPlayedAngle = -1;
+        
+        // Ativa o efeito de PISCAR na fatia vencedora
+        winnerIndexGlobal = winnerIndex; 
+        
+        const result = prizes[winnerIndex].label;
+
+        // Para o efeito de piscar após 2 segundos e limpa o brilho
+        setTimeout(() => {
+            winnerIndexGlobal = -1;
+            draw(); // Redesenha a roleta em estado normal
+        }, 2000);
+
+        // 5. Tratamento dos resultados
+        if (result === "MAIS UMA CHANCE") {
+            update(ref(db, 'clientes/' + clienteAtivo.telefone), { 
+                giros: clienteAtivo.giros + 1 
+            });
+            alert("🍀 MAIS UMA CHANCE!");
+        } else if (result === "NÃO FOI DESSA VEZ") {
+            if(clienteAtivo.giros <= 0) {
+                document.getElementById('modalEsgotado').style.display = 'flex';
+            }
+        } else {
+            // Ganhou um prêmio real
+            document.getElementById('prizeDisplay').innerText = result;
+            document.getElementById('modal').style.display = 'flex';
+            
+            // Efeito de confete
+            confetti({ 
+                particleCount: 150, 
+                spread: 70, 
+                origin: { y: 0.6 },
+                colors: ['#d4af37', '#ffffff', '#f1c40f'] 
+            });
+            
+            // Grava o prêmio no Firebase para o ADM conferir
+            set(ref(db, 'premios/' + Date.now()), {
+                nome: clienteAtivo.nome,
+                telefone: clienteAtivo.telefone, 
+                premio: result,
+                hora: new Date().toLocaleTimeString()
+            });
+        }
+        
+        // Atualiza a interface (Giros restantes)
+        atualizarUI();
+        
+    }, 6000); // 6 segundos é o tempo padrão da transição CSS da roleta
+}
+
 
     btnSpin.addEventListener('click', spin);
     document.getElementById('btnClosePrize').onclick = () => {
