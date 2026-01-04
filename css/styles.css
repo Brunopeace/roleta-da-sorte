@@ -158,8 +158,8 @@
             border-radius: 28px;
             padding: 24px;
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+       border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -174,20 +174,67 @@
             color: #f1c40f;
             margin: 0 auto 10px;
         }
+              
+/* Card Principal do Modal */
+.app-modal-card {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(241, 196, 15, 0.15) 100%);
+border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    color: #ffffff;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
+    text-align: center;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
 
-        .btn-native-primary {
-            width: 100%;
-            height: 54px;
-            background: #ffffff;
-            border: none;
-            border-radius: 16px;
-            color: #000000;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+/* Estilo da Logo */
+.logo-status {
+    margin-top: 15px;
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    margin-bottom: 30px;
+}
 
+/* Título */
+.app-modal-header h2 {
+    color: #d4af37; /* Dourado */
+    font-size: 24px;
+    font-weight: 800;
+    margin: 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Texto do corpo */
+.app-modal-body p {
+    color: #ffffff; /* letra branca */
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    padding: 0 10px;
+}
+
+/* Botão Fechar */
+.btn-native-primary {
+    width: 100%;
+    background: var(--gold-gradient);    
+    color: #000000; 
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+.btn-native-primary:active {
+    transform: scale(0.98); /* Efeito de clique */
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+      
         @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         #btnFecharEdicao {
