@@ -77,14 +77,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
     let lastPlayedAngle = -1;
 
     const prizes = [
-        { label: "1 MÊS", color: "#2ecc71", weight: 7 },
-        { label: "NÃO FOI DESSA VEZ", color: "#222", weight: 95 },
-        { label: "1 ANO", color: "#f1c40f", weight: 1 },
-        { label: "2 MESES", color: "#3498db", weight: 4 },
-        { label: "6 MESES", color: "#e74c3c", weight: 1 },
-        { label: "MAIS UMA CHANCE", color: "#9b59b6", weight: 40 },
-        { label: "1 MÊS", color: "#1abc9c", weight: 7 },
-        { label: "NÃO FOI DESSA VEZ", color: "#222", weight: 95 }
+        { label: "1 MÊS", color: "#2ecc71", weight: 1 },
+        { label: "NÃO FOI DESSA VEZ", color: "#222", weight: 45 },
+        { label: "1 ANO", color: "#f1c40f", weight: 0.1 },
+        { label: "2 MESES", color: "#3498db", weight: 0.6 },
+        { label: "6 MESES", color: "#e74c3c", weight: 0.2 },
+        { label: "MAIS UMA CHANCE", color: "#9b59b6", weight: 7.1 },
+        { label: "1 MÊS", color: "#1abc9c", weight: 1 },
+        { label: "NÃO FOI DESSA VEZ", color: "#222", weight: 45 }
     ];
 
     const arc = (2 * Math.PI) / prizes.length;
@@ -106,6 +106,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
             btn.innerText = "CADASTRAR";
             toggleText.innerHTML = 'Já tem conta? <span onclick="toggleAuthMode(\'login\')" style="color: var(--viva-yellow); cursor: pointer; font-weight: bold;">Entrar</span>';
         } else {
+        
+        
+        
+        
             title.innerText = "LOGIN";
             desc.innerText = "Acesse sua conta para girar a roleta da sorte";
             inputNome.style.display = "none";
