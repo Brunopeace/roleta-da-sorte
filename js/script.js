@@ -338,7 +338,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
     requestAnimationFrame(checkTick);
 }
 
-
     function spin() {
     if (clienteAtivo.giros <= 0 || isSpinning) return;
     
@@ -364,17 +363,20 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
         random -= prizes[i].weight;
     }
 
-    // 3. Cálculo da rotação (ajustado para a seta no topo)
+    // 3. Cálculo da rotação
     const targetSliceAngle = (winnerIndex * degPerSlice) + (degPerSlice / 2);
     const finalAngle = 360 - targetSliceAngle - 90; 
-    currentRotation += (3600 + finalAngle - (currentRotation % 360));
     
+    // --- ALTERAÇÃO: 5400 graus (15 voltas) + o ângulo do prêmio ---
+    currentRotation += (5400 + finalAngle - (currentRotation % 360));
+    
+    // Aplica a rotação ao canvas
     canvas.style.transform = `rotate(${currentRotation}deg)`;
     
-    // Inicia o monitoramento da seta para tocar o som e acender as fatias
+    // Inicia o monitoramento da seta para som e iluminação ativa
     requestAnimationFrame(checkTick);
 
-    // 4. Quando a roleta para (após 6 segundos de animação CSS)
+    // 4. Quando a roleta para (Ajustado para 7 segundos)
     setTimeout(() => {
         isSpinning = false;
         lastPlayedAngle = -1;
@@ -384,10 +386,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
         
         const result = prizes[winnerIndex].label;
 
-        // Para o efeito de piscar após 2 segundos e limpa o brilho
+        // Para o efeito de piscar após 2 segundos
         setTimeout(() => {
             winnerIndexGlobal = -1;
-            draw(); // Redesenha a roleta em estado normal
+            draw(); // Redesenha em estado normal
         }, 2000);
 
         // 5. Tratamento dos resultados
@@ -401,11 +403,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
                 document.getElementById('modalEsgotado').style.display = 'flex';
             }
         } else {
-            // Ganhou um prêmio real
+            // Ganhou prêmio
             document.getElementById('prizeDisplay').innerText = result;
             document.getElementById('modal').style.display = 'flex';
             
-            // Efeito de confete
             confetti({ 
                 particleCount: 150, 
                 spread: 70, 
@@ -413,7 +414,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
                 colors: ['#d4af37', '#ffffff', '#f1c40f'] 
             });
             
-            // Grava o prêmio no Firebase para o ADM conferir
             set(ref(db, 'premios/' + Date.now()), {
                 nome: clienteAtivo.nome,
                 telefone: clienteAtivo.telefone, 
@@ -422,12 +422,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
             });
         }
         
-        // Atualiza a interface (Giros restantes)
         atualizarUI();
         
-    }, 6000); // 6 segundos é o tempo padrão da transição CSS da roleta
+    }, 8000);
 }
-
 
     btnSpin.addEventListener('click', spin);
     document.getElementById('btnClosePrize').onclick = () => {
