@@ -1,4 +1,4 @@
-const CACHE_NAME = 'giro-da-sorte-v1';
+const CACHE_NAME = 'giro-da-sorte-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
