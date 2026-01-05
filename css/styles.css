@@ -5,7 +5,11 @@
         }
 
         body {
-            background: radial-gradient(circle at center, #1a4a1a 0%, #050d05 100%);
+            background-image: url('../img/body.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
             margin: 0;
             display: flex;
             flex-direction: column;
